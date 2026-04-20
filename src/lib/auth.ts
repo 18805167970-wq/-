@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
 import type { UserInfo } from '@/types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reimbursement-system-secret-key';
@@ -50,5 +51,26 @@ export async function getCurrentUser(): Promise<UserInfo | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(TOKEN_NAME)?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const tokenUser = verifyToken(token);
+  if (!tokenUser) return null;
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: tokenUser.id },
+      include: { approver: { select: { name: true } } },
+    });
+    if (!dbUser) return null;
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role,
+      department: dbUser.department,
+      phone: dbUser.phone,
+      approverId: dbUser.approverId,
+      approverName: dbUser.approver?.name || null,
+    };
+  } catch {
+    return tokenUser;
+  }
 }
