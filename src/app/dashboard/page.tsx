@@ -60,35 +60,35 @@ export default function DashboardPage() {
     <MainLayout>
       <Title level={4} style={{ marginBottom: 24 }}>工作台</Title>
       <Spin spinning={loading}>
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col span={6}>
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={12} sm={12} md={6}>
             <Card hoverable onClick={() => router.push('/reimbursement/list')}>
               <Statistic title="全部报销" value={reimbursements.length} prefix={<FileTextOutlined />} />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={12} md={6}>
             <Card hoverable>
-              <Statistic title="待审批" value={pending} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#1890ff' }} />
+              <Statistic title="待审批" value={pending} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#0f2b5b' }} />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={12} md={6}>
             <Card hoverable>
               <Statistic title="已通过" value={approved} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#52c41a' }} />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={12} md={6}>
             <Card hoverable>
               <Statistic title="已驳回" value={rejected} prefix={<CloseCircleOutlined />} valueStyle={{ color: '#ff4d4f' }} />
             </Card>
           </Col>
         </Row>
-        <Row gutter={16}>
-          <Col span={12}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
             <Card title="已通过报销总额">
               <Statistic value={totalAmount} precision={2} prefix="¥" valueStyle={{ fontSize: 32, color: '#52c41a' }} />
             </Card>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Card
               title="最近报销记录"
               extra={

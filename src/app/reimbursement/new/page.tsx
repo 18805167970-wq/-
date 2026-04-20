@@ -214,9 +214,9 @@ export default function NewReimbursementPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, minHeight: 520 }} onMouseUp={handleMouseUp}>
+      <div style={{ display: 'flex', gap: 16, minHeight: 520, flexWrap: 'wrap' }} onMouseUp={handleMouseUp}>
         <Card
-          style={{ flex: '0 0 420px' }}
+          style={{ flex: '0 0 420px', minWidth: 320, maxWidth: '100%' }}
           title={
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Button type="text" icon={<LeftOutlined />} onClick={() => { setCurrentMonth(m => m.subtract(1, 'month')); setSelectedDates(new Set()); setDailyDetails({}); setEditingDate(null); }} />
@@ -249,8 +249,8 @@ export default function NewReimbursementPage() {
                     padding: '10px 4px',
                     borderRadius: 8,
                     cursor: 'pointer',
-                    border: isEditing ? '2px solid #1677ff' : '2px solid transparent',
-                    backgroundColor: isSelected ? '#e6f4ff' : 'transparent',
+                    border: isEditing ? '2px solid #0f2b5b' : '2px solid transparent',
+                    backgroundColor: isSelected ? '#e8edf5' : 'transparent',
                     color: isWeekend ? '#ff7875' : '#333',
                     fontWeight: isSelected ? 600 : 400,
                     fontSize: 14,
@@ -402,18 +402,18 @@ export default function NewReimbursementPage() {
 
       <Card style={{ marginTop: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ display: 'flex', gap: 32 }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>出差天数</Text>
               <Text strong style={{ fontSize: 20 }}>{sortedSelectedDates.length} 天</Text>
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>住宿费总额</Text>
-              <Text strong style={{ fontSize: 20, color: '#1677ff' }}>¥{totals.totalHotelFee.toFixed(2)}</Text>
+              <Text strong style={{ fontSize: 20, color: '#0f2b5b' }}>¥{totals.totalHotelFee.toFixed(2)}</Text>
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>交通费总额</Text>
-              <Text strong style={{ fontSize: 20, color: '#1677ff' }}>¥{totals.totalTransportFee.toFixed(2)}</Text>
+              <Text strong style={{ fontSize: 20, color: '#0f2b5b' }}>¥{totals.totalTransportFee.toFixed(2)}</Text>
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>报销总额</Text>

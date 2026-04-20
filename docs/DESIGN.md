@@ -1,6 +1,6 @@
 # 外包报销管理系统 - MVP 设计文档
 
-> 版本：v0.4.0
+> 版本：v0.4.1
 > 最后更新：2026-04-20
 > 状态：已上线（Netlify + Supabase 部署）
 
@@ -362,7 +362,8 @@ reimbursement-system/
 ### Phase 7：UI/UX 优化 ✅
 
 #### 7.1 品牌与视觉风格
-- [x] 系统名称改为 "Bytedance 报销系统"，侧边栏展示字节跳动 Logo
+- [x] 系统名称改为 "Bytedance 报销系统"，纯文字标题（无 Logo）
+- [x] 主色调：深蓝色 `#0f2b5b`（替代默认蓝 `#1677ff`）
 - [x] 整体页面风格升级为 OpenAI 官网风格简约设计
   - 渐变背景（灰蓝色渐变）
   - 毛玻璃效果侧边栏和头部（backdrop-filter: blur）
@@ -371,6 +372,7 @@ reimbursement-system/
   - 自定义滚动条
   - 页面切换淡入动画（fadeSlideIn）
 - [x] 登录/注册页面：居中卡片布局 + 背景渐变动画 + 毛玻璃卡片
+- [x] 侧边栏折叠时显示 "BD" 缩写
 
 #### 7.2 交互体验
 - [x] 菜单页面跳转增加顶部 loading 进度条（蓝紫渐变，2px 固定顶部）
@@ -396,7 +398,15 @@ reimbursement-system/
   - 出差事由自动按连续日期段归组展示（日期范围 + 原因列表）
   - 出差地点自动去重合并（用 `/` 连接）
 
-#### 7.6 Bug 修复
+#### 7.6 响应式适配（v0.4.1）
+- [x] 侧边栏 `breakpoint="lg"` 自动折叠（小屏幕自动收起）
+- [x] 工作台统计卡片：`xs={12} md={6}` 响应式列布局
+- [x] 新建报销页面日历和编辑面板 `flexWrap` 支持小屏竖排
+- [x] 底部汇总栏支持换行
+- [x] 认证页面卡片宽度自适应 `calc(100vw - 32px)`
+- [x] CSS media query 断点：768px / 576px
+
+#### 7.7 Bug 修复
 - [x] `getCurrentUser()` 改为从数据库实时读取用户角色，修复在 Supabase 中修改角色后 JWT 缓存导致权限不生效的问题
 - [x] `/api/auth/me` 路由简化，复用 `getCurrentUser()` 的数据库查询逻辑
 
@@ -411,6 +421,7 @@ reimbursement-system/
 | v0.3.0 | 2026-04-20 | **重大变更**：报销表单从单条改为月度日历模式。新增日历拖拽选日、逐日明细编辑、交通方式多选、三项费用独立汇总。新增 ReimbursementDetail 模型。 | AI Assistant |
 | v0.3.1 | 2026-04-20 | 项目部署上线。Supabase 数据库配置 + Prisma 迁移 + Netlify 自动部署。修复 getCurrentUser 角色缓存 Bug。 | AI Assistant |
 | v0.4.0 | 2026-04-20 | **UI/UX 全面优化**：① 品牌升级为 Bytedance 报销系统 + Logo ② OpenAI 风格毛玻璃简约 UI ③ 页面跳转 loading 进度条 ④ 工作台筛选（月份+状态）⑤ 出差地全国城市模糊搜索 ⑥ 交通方式改为选填 ⑦ 邮件模板调整为字节内部格式（含团队/加班天数/出差事由按日期段归组）| AI Assistant |
+| v0.4.1 | 2026-04-20 | 去掉字节跳动 Logo，主色调改为深蓝色 `#0f2b5b`。新增响应式适配：侧边栏小屏自动折叠、统计卡片/日历面板响应式布局、CSS media query 断点支持 | AI Assistant |
 
 ---
 

@@ -19,8 +19,6 @@ import type { UserInfo } from '@/types';
 
 const { Header, Sider, Content } = Layout;
 
-const BYTEDANCE_LOGO = 'data:image/svg+xml;base64,' + btoa(`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.95 2.5c0-0.28 0.22-0.5 0.5-0.5h2.1c0.28 0 0.5 0.22 0.5 0.5v7.07l4.67-4.67c0.2-0.2 0.51-0.2 0.71 0l1.48 1.48c0.2 0.2 0.2 0.51 0 0.71L18.24 11.76l4.67 4.67c0.2 0.2 0.2 0.51 0 0.71l-1.48 1.48c-0.2 0.2-0.51 0.2-0.71 0L16.05 13.95V21c0 0.28-0.22 0.5-0.5 0.5h-2.1c-0.28 0-0.5-0.22-0.5-0.5V2.5zM2 7.5C2 7.22 2.22 7 2.5 7h2.1c0.28 0 0.5 0.22 0.5 0.5V21c0 0.28-0.22 0.5-0.5 0.5H2.5C2.22 21.5 2 21.28 2 21V7.5zM7.48 11c0-0.28 0.22-0.5 0.5-0.5h2.1c0.28 0 0.5 0.22 0.5 0.5v10c0 0.28-0.22 0.5-0.5 0.5h-2.1c-0.28 0-0.5-0.22-0.5-0.5V11z" fill="#1a1a2e"/></svg>`);
-
 interface MainLayoutProps {
   children: React.ReactNode;
 }
@@ -111,10 +109,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       {navigating && loadingProgress > 0 && (
         <div className="nav-loading-bar" style={{ width: `${loadingProgress}%` }} />
       )}
-      <Sider trigger={null} collapsible collapsed={collapsed} className="app-sider" width={220}>
+      <Sider trigger={null} collapsible collapsed={collapsed} className="app-sider" width={220} breakpoint="lg" collapsedWidth={80} onBreakpoint={(broken) => { if (broken) setCollapsed(true); }}>
         <div className="logo-container">
-          <img src={BYTEDANCE_LOGO} alt="Bytedance" />
-          {!collapsed && <h1>Bytedance 报销系统</h1>}
+          {!collapsed ? <h1>Bytedance 报销系统</h1> : <h1>BD</h1>}
         </div>
         <Menu
           mode="inline"
@@ -133,7 +130,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           />
           <Dropdown menu={userDropdownItems} placement="bottomRight">
             <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} />
+              <Avatar style={{ backgroundColor: '#0f2b5b' }} icon={<UserOutlined />} />
               <span style={{ fontWeight: 500 }}>{user.name}</span>
             </div>
           </Dropdown>

@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 50%, #dfe6ed 100%);
-  --sidebar-bg: rgba(255, 255, 255, 0.85);
-  --content-bg: rgba(255, 255, 255, 0.72);
+  --primary: #0f2b5b;
+  --primary-light: #1a3d7c;
+  --primary-hover: rgba(15, 43, 91, 0.08);
+  --primary-active: rgba(15, 43, 91, 0.14);
+  --bg-gradient: linear-gradient(135deg, #f0f2f5 0%, #e4e8ee 50%, #dce1e8 100%);
+  --sidebar-bg: rgba(255, 255, 255, 0.88);
+  --content-bg: rgba(255, 255, 255, 0.75);
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -39,11 +43,16 @@ body {
 }
 
 .app-sider .ant-menu-item:hover {
-  background: rgba(22, 119, 255, 0.06) !important;
+  background: var(--primary-hover) !important;
 }
 
 .app-sider .ant-menu-item-selected {
-  background: rgba(22, 119, 255, 0.1) !important;
+  background: var(--primary-active) !important;
+  color: var(--primary) !important;
+}
+
+.app-sider .ant-menu-item-selected .anticon {
+  color: var(--primary) !important;
 }
 
 .app-header {
@@ -78,26 +87,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 0 12px;
-}
-
-.logo-container img {
-  height: 28px;
-  width: auto;
+  padding: 0 16px;
 }
 
 .logo-container h1 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
   white-space: nowrap;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
 }
 
 .auth-page {
@@ -117,8 +118,8 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at 30% 50%, rgba(22, 119, 255, 0.04) 0%, transparent 50%),
-              radial-gradient(circle at 70% 50%, rgba(114, 46, 209, 0.03) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 50%, rgba(15, 43, 91, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 50%, rgba(15, 43, 91, 0.03) 0%, transparent 50%);
   animation: bgShift 20s ease-in-out infinite alternate;
 }
 
@@ -152,7 +153,7 @@ body {
   top: 0;
   left: 0;
   height: 2px;
-  background: linear-gradient(90deg, #1677ff, #722ed1);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
   z-index: 9999;
   transition: width 0.3s ease;
 }
@@ -173,4 +174,37 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .app-content {
+    margin: 8px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .ant-card {
+    border-radius: 8px !important;
+  }
+
+  .auth-card {
+    width: calc(100vw - 32px) !important;
+    max-width: 420px;
+    margin: 16px;
+  }
+
+  .logo-container h1 {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-content {
+    margin: 4px !important;
+    padding: 8px !important;
+  }
+
+  .auth-card {
+    border-radius: 16px !important;
+  }
 }
