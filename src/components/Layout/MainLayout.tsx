@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Button, Dropdown, Avatar, theme } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Layout, Menu, Button, Dropdown, Avatar, Spin } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -19,6 +19,8 @@ import type { UserInfo } from '@/types';
 
 const { Header, Sider, Content } = Layout;
 
+const BYTEDANCE_LOGO = 'data:image/svg+xml;base64,' + btoa(`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.95 2.5c0-0.28 0.22-0.5 0.5-0.5h2.1c0.28 0 0.5 0.22 0.5 0.5v7.07l4.67-4.67c0.2-0.2 0.51-0.2 0.71 0l1.48 1.48c0.2 0.2 0.2 0.51 0 0.71L18.24 11.76l4.67 4.67c0.2 0.2 0.2 0.51 0 0.71l-1.48 1.48c-0.2 0.2-0.51 0.2-0.71 0L16.05 13.95V21c0 0.28-0.22 0.5-0.5 0.5h-2.1c-0.28 0-0.5-0.22-0.5-0.5V2.5zM2 7.5C2 7.22 2.22 7 2.5 7h2.1c0.28 0 0.5 0.22 0.5 0.5V21c0 0.28-0.22 0.5-0.5 0.5H2.5C2.22 21.5 2 21.28 2 21V7.5zM7.48 11c0-0.28 0.22-0.5 0.5-0.5h2.1c0.28 0 0.5 0.22 0.5 0.5v10c0 0.28-0.22 0.5-0.5 0.5h-2.1c-0.28 0-0.5-0.22-0.5-0.5V11z" fill="#1a1a2e"/></svg>`);
+
 interface MainLayoutProps {
   children: React.ReactNode;
 }
@@ -26,9 +28,10 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [navigating, setNavigating] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
-  const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -42,6 +45,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
       })
       .catch(() => router.push('/login'));
   }, [router]);
+
+  useEffect(() => {
+    setNavigating(false);
+    setLoadingProgress(0);
+  }, [pathname]);
+
+  const handleNavigate = useCallback((path: string) => {
+    if (path === pathname) return;
+    setNavigating(true);
+    setLoadingProgress(30);
+    const t1 = setTimeout(() => setLoadingProgress(60), 150);
+    const t2 = setTimeout(() => setLoadingProgress(85), 400);
+    router.push(path);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [pathname, router]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -82,26 +100,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
     ],
   };
 
-  if (!user) return null;
+  if (!user) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Spin size="large" />
+    </div>
+  );
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="light" style={{ borderRight: '1px solid #f0f0f0' }}>
-        <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #f0f0f0' }}>
-          <h1 style={{ margin: 0, fontSize: collapsed ? 16 : 18, fontWeight: 600, whiteSpace: 'nowrap' }}>
-            {collapsed ? '报销' : '报销管理系统'}
-          </h1>
+    <Layout className="app-layout">
+      {navigating && loadingProgress > 0 && (
+        <div className="nav-loading-bar" style={{ width: `${loadingProgress}%` }} />
+      )}
+      <Sider trigger={null} collapsible collapsed={collapsed} className="app-sider" width={220}>
+        <div className="logo-container">
+          <img src={BYTEDANCE_LOGO} alt="Bytedance" />
+          {!collapsed && <h1>Bytedance 报销系统</h1>}
         </div>
         <Menu
           mode="inline"
           selectedKeys={[pathname]}
           items={getMenuItems()}
-          onClick={({ key }) => router.push(key)}
-          style={{ borderRight: 0 }}
+          onClick={({ key }) => handleNavigate(key)}
+          style={{ borderRight: 0, marginTop: 8 }}
         />
       </Sider>
-      <Layout>
-        <Header style={{ padding: '0 24px', background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
+      <Layout style={{ background: 'transparent' }}>
+        <Header className="app-header" style={{ padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -109,12 +133,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
           />
           <Dropdown menu={userDropdownItems} placement="bottomRight">
             <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar icon={<UserOutlined />} />
-              <span>{user.name}</span>
+              <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} />
+              <span style={{ fontWeight: 500 }}>{user.name}</span>
             </div>
           </Dropdown>
         </Header>
-        <Content style={{ margin: 24, padding: 24, background: colorBgContainer, borderRadius: borderRadiusLG, overflow: 'auto' }}>
+        <Content className="app-content page-transition" style={{ margin: 24, padding: 24, overflow: 'auto' }}>
           {children}
         </Content>
       </Layout>

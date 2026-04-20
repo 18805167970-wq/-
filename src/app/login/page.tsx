@@ -36,10 +36,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-      <Card style={{ width: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+    <div className="auth-page">
+      <Card className="auth-card" style={{ width: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <Title level={3} style={{ marginBottom: 8 }}>报销管理系统</Title>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🏢</div>
+          <Title level={3} style={{ marginBottom: 4 }}>Bytedance 报销管理系统</Title>
           <Text type="secondary">登录您的账号</Text>
         </div>
         <Form form={form} onFinish={onFinish} size="large">
@@ -50,7 +51,7 @@ export default function LoginPage() {
             <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
+            <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, borderRadius: 10 }}>
               登录
             </Button>
           </Form.Item>

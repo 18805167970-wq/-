@@ -2,19 +2,21 @@
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
-  Button, Card, message, Typography, Input, InputNumber, Select, Tag, Modal, DatePicker,
+  Button, Card, message, Typography, InputNumber, Select, Tag, Modal, DatePicker, AutoComplete,
 } from 'antd';
 import { LeftOutlined, RightOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
 import MainLayout from '@/components/Layout/MainLayout';
 import { TRANSPORT_TYPES } from '@/types';
 import type { DailyDetail } from '@/types';
 import { useRouter } from 'next/navigation';
+import { CHINA_LOCATIONS } from '@/lib/locations';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
-const { TextArea } = Input;
 
 const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
+
+const locationOptions = CHINA_LOCATIONS.map(l => ({ value: l, label: l }));
 
 export default function NewReimbursementPage() {
   const router = useRouter();
@@ -24,6 +26,8 @@ export default function NewReimbursementPage() {
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [emailPreview, setEmailPreview] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState('');
+  const [overtimeDays, setOvertimeDays] = useState(0);
 
   const isDragging = useRef(false);
   const dragStart = useRef<string | null>(null);
@@ -135,7 +139,7 @@ export default function NewReimbursementPage() {
   }, [dailyDetails]);
 
   const isDetailComplete = (d: DailyDetail) =>
-    d.destination && d.reason && d.transportTypes.length > 0;
+    d.destination && d.reason;
 
   const handleSubmit = async () => {
     if (sortedSelectedDates.length === 0) {
@@ -154,6 +158,8 @@ export default function NewReimbursementPage() {
       const payload = {
         month: currentMonth.format('YYYY-MM'),
         dailyDetails: sortedSelectedDates.map(d => dailyDetails[d]),
+        teamName,
+        overtimeDays,
       };
       const res = await fetch('/api/reimbursement', {
         method: 'POST',
@@ -192,8 +198,23 @@ export default function NewReimbursementPage() {
         />
       </div>
 
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <div style={{ flex: 1 }}>
+          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>团队名称</Text>
+          <AutoComplete
+            style={{ width: '100%' }}
+            value={teamName}
+            onChange={v => setTeamName(v)}
+            placeholder="例如：机器人产业化"
+          />
+        </div>
+        <div style={{ width: 150 }}>
+          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>加班天数</Text>
+          <InputNumber style={{ width: '100%' }} value={overtimeDays} onChange={v => setOvertimeDays(v || 0)} min={0} addonAfter="天" />
+        </div>
+      </div>
+
       <div style={{ display: 'flex', gap: 16, minHeight: 520 }} onMouseUp={handleMouseUp}>
-        {/* 左侧日历 */}
         <Card
           style={{ flex: '0 0 420px' }}
           title={
@@ -226,7 +247,7 @@ export default function NewReimbursementPage() {
                     position: 'relative',
                     textAlign: 'center',
                     padding: '10px 4px',
-                    borderRadius: 6,
+                    borderRadius: 8,
                     cursor: 'pointer',
                     border: isEditing ? '2px solid #1677ff' : '2px solid transparent',
                     backgroundColor: isSelected ? '#e6f4ff' : 'transparent',
@@ -261,9 +282,7 @@ export default function NewReimbursementPage() {
           </div>
         </Card>
 
-        {/* 右侧编辑面板 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* 已选日期标签 */}
           <Card size="small" title={`已选日期（${sortedSelectedDates.length}天）`}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {sortedSelectedDates.length === 0 && <Text type="secondary">在左侧日历中拖拽或点击选择出差日期</Text>}
@@ -286,7 +305,6 @@ export default function NewReimbursementPage() {
             </div>
           </Card>
 
-          {/* 当日明细编辑 */}
           {currentDetail && editingDate && (
             <Card
               size="small"
@@ -299,30 +317,37 @@ export default function NewReimbursementPage() {
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>出差地</Text>
-                  <Input
+                  <Text type="secondary" style={{ fontSize: 12 }}>出差地 <span style={{ color: '#ff4d4f' }}>*</span></Text>
+                  <AutoComplete
+                    style={{ width: '100%' }}
                     value={currentDetail.destination}
-                    onChange={e => updateDetail(editingDate, 'destination', e.target.value)}
-                    placeholder="例如：上海"
+                    onChange={v => updateDetail(editingDate, 'destination', v)}
+                    placeholder="输入城市名搜索"
+                    options={locationOptions}
+                    filterOption={(input, option) =>
+                      (option?.value as string)?.includes(input)
+                    }
                   />
                 </div>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>出差原因</Text>
-                  <Input
+                  <Text type="secondary" style={{ fontSize: 12 }}>出差原因 <span style={{ color: '#ff4d4f' }}>*</span></Text>
+                  <AutoComplete
+                    style={{ width: '100%' }}
                     value={currentDetail.reason}
-                    onChange={e => updateDetail(editingDate, 'reason', e.target.value)}
+                    onChange={v => updateDetail(editingDate, 'reason', v)}
                     placeholder="简述出差目的"
                   />
                 </div>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>交通方式（多选）</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>交通方式（多选，选填）</Text>
                   <Select
                     mode="multiple"
                     style={{ width: '100%' }}
                     value={currentDetail.transportTypes}
                     onChange={v => updateDetail(editingDate, 'transportTypes', v)}
-                    placeholder="选择交通方式"
+                    placeholder="选择交通方式（选填）"
                     options={TRANSPORT_TYPES.map(t => ({ label: t, value: t }))}
+                    allowClear
                   />
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
@@ -347,10 +372,10 @@ export default function NewReimbursementPage() {
                 </div>
                 <div>
                   <Text type="secondary" style={{ fontSize: 12 }}>备注</Text>
-                  <TextArea
-                    rows={2}
-                    value={currentDetail.remark}
-                    onChange={e => updateDetail(editingDate, 'remark', e.target.value)}
+                  <AutoComplete
+                    style={{ width: '100%' }}
+                    value={currentDetail.remark || ''}
+                    onChange={v => updateDetail(editingDate, 'remark', v)}
                     placeholder="补充说明（选填）"
                   />
                 </div>
@@ -375,7 +400,6 @@ export default function NewReimbursementPage() {
         </div>
       </div>
 
-      {/* 底部汇总栏 */}
       <Card style={{ marginTop: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ display: 'flex', gap: 32 }}>
@@ -406,7 +430,7 @@ export default function NewReimbursementPage() {
         title="邮件预览"
         open={!!emailPreview}
         onCancel={() => { setEmailPreview(null); message.success('报销申请提交成功'); router.push('/reimbursement/list'); }}
-        width={650}
+        width={700}
         footer={[
           <Button key="copy" type="primary" icon={<CopyOutlined />} onClick={() => {
             navigator.clipboard.writeText(emailPreview || '');
@@ -415,7 +439,7 @@ export default function NewReimbursementPage() {
           <Button key="close" onClick={() => { setEmailPreview(null); router.push('/reimbursement/list'); }}>关闭</Button>,
         ]}
       >
-        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', lineHeight: 1.8 }}>{emailPreview}</pre>
+        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', lineHeight: 1.8, fontSize: 14 }}>{emailPreview}</pre>
       </Modal>
     </MainLayout>
   );

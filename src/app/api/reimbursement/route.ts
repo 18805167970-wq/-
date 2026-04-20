@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { month, dailyDetails } = await request.json();
+    const { month, dailyDetails, teamName, overtimeDays } = await request.json();
 
     if (!month || !dailyDetails || dailyDetails.length === 0) {
       return NextResponse.json({ error: '请至少选择一天出差日期并填写明细' }, { status: 400 });
@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
       totalAmount,
       applicantName: user.name,
       approverName: dbUser?.approver?.name || '审批人',
+      teamName: teamName || '',
+      overtimeDays: overtimeDays || 0,
     });
 
     const reimbursement = await prisma.reimbursement.create({

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Table, Tag, Typography, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Card, Row, Col, Statistic, Table, Tag, Typography, Spin, Select, DatePicker, Space } from 'antd';
 import { FileTextOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import MainLayout from '@/components/Layout/MainLayout';
-import type { ReimbursementRecord } from '@/types';
+import type { ReimbursementRecord, ReimbursementStatus } from '@/types';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -13,6 +13,8 @@ const { Title } = Typography;
 export default function DashboardPage() {
   const [reimbursements, setReimbursements] = useState<ReimbursementRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterMonth, setFilterMonth] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<ReimbursementStatus | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +25,17 @@ export default function DashboardPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const filteredRecords = useMemo(() => {
+    let records = reimbursements;
+    if (filterMonth) {
+      records = records.filter(r => r.month === filterMonth);
+    }
+    if (filterStatus) {
+      records = records.filter(r => r.status === filterStatus);
+    }
+    return records;
+  }, [reimbursements, filterMonth, filterStatus]);
 
   const pending = reimbursements.filter(r => r.status === 'PENDING').length;
   const approved = reimbursements.filter(r => r.status === 'APPROVED').length;
@@ -76,9 +89,37 @@ export default function DashboardPage() {
             </Card>
           </Col>
           <Col span={12}>
-            <Card title="最近报销记录">
+            <Card
+              title="最近报销记录"
+              extra={
+                <Space size={8}>
+                  <DatePicker
+                    picker="month"
+                    placeholder="筛选月份"
+                    size="small"
+                    allowClear
+                    onChange={(v) => setFilterMonth(v ? v.format('YYYY-MM') : null)}
+                    style={{ width: 120 }}
+                  />
+                  <Select
+                    placeholder="状态"
+                    size="small"
+                    allowClear
+                    value={filterStatus}
+                    onChange={(v) => setFilterStatus(v || null)}
+                    options={[
+                      { label: '待审批', value: 'PENDING' },
+                      { label: '已通过', value: 'APPROVED' },
+                      { label: '已驳回', value: 'REJECTED' },
+                      { label: '已撤回', value: 'WITHDRAWN' },
+                    ]}
+                    style={{ width: 100 }}
+                  />
+                </Space>
+              }
+            >
               <Table
-                dataSource={reimbursements.slice(0, 5)}
+                dataSource={filteredRecords.slice(0, 5)}
                 columns={columns}
                 rowKey="id"
                 pagination={false}
