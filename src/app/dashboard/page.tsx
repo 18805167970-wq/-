@@ -1,0 +1,94 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Card, Row, Col, Statistic, Table, Tag, Typography, Spin } from 'antd';
+import { FileTextOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import MainLayout from '@/components/Layout/MainLayout';
+import type { ReimbursementRecord } from '@/types';
+import { STATUS_LABELS, STATUS_COLORS } from '@/types';
+import { useRouter } from 'next/navigation';
+
+const { Title } = Typography;
+
+export default function DashboardPage() {
+  const [reimbursements, setReimbursements] = useState<ReimbursementRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/reimbursement')
+      .then(res => res.json())
+      .then(data => {
+        if (data.reimbursements) setReimbursements(data.reimbursements);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const pending = reimbursements.filter(r => r.status === 'PENDING').length;
+  const approved = reimbursements.filter(r => r.status === 'APPROVED').length;
+  const rejected = reimbursements.filter(r => r.status === 'REJECTED').length;
+  const totalAmount = reimbursements
+    .filter(r => r.status === 'APPROVED')
+    .reduce((sum, r) => sum + Number(r.totalAmount), 0);
+
+  const columns = [
+    { title: '月份', dataIndex: 'month', key: 'month' },
+    { title: '天数', key: 'days', render: (_: unknown, record: ReimbursementRecord) => `${record.details?.length || 0}天` },
+    { title: '总额', dataIndex: 'totalAmount', key: 'totalAmount', render: (v: number) => `¥${Number(v).toFixed(2)}` },
+    {
+      title: '状态', dataIndex: 'status', key: 'status',
+      render: (status: ReimbursementRecord['status']) => (
+        <Tag color={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</Tag>
+      ),
+    },
+  ];
+
+  return (
+    <MainLayout>
+      <Title level={4} style={{ marginBottom: 24 }}>工作台</Title>
+      <Spin spinning={loading}>
+        <Row gutter={16} style={{ marginBottom: 24 }}>
+          <Col span={6}>
+            <Card hoverable onClick={() => router.push('/reimbursement/list')}>
+              <Statistic title="全部报销" value={reimbursements.length} prefix={<FileTextOutlined />} />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card hoverable>
+              <Statistic title="待审批" value={pending} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#1890ff' }} />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card hoverable>
+              <Statistic title="已通过" value={approved} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#52c41a' }} />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card hoverable>
+              <Statistic title="已驳回" value={rejected} prefix={<CloseCircleOutlined />} valueStyle={{ color: '#ff4d4f' }} />
+            </Card>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card title="已通过报销总额">
+              <Statistic value={totalAmount} precision={2} prefix="¥" valueStyle={{ fontSize: 32, color: '#52c41a' }} />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title="最近报销记录">
+              <Table
+                dataSource={reimbursements.slice(0, 5)}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                size="small"
+                onRow={(record) => ({ onClick: () => router.push(`/reimbursement/${record.id}`), style: { cursor: 'pointer' } })}
+              />
+            </Card>
+          </Col>
+        </Row>
+      </Spin>
+    </MainLayout>
+  );
+}
